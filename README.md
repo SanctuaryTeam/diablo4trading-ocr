@@ -35,8 +35,26 @@ This library aims to provide developers with an easy-to-use Optical Character Re
 - Make sure the game data packages are available and up-to-date. This ensures accurate JSON representation.
 
 ---
+## Links
+**Discord support channels**
+
+[#project-discussion](https://discord.com/channels/989899054815281243/1133463025958002729)
+
+[#project-forum](https://discord.com/channels/989899054815281243/1138949095877263400)
+
+**Sanctuary Team projects**
+
+[Sanctuary Team Repos](https://github.com/SanctuaryTeam)
+
+[Front End](https://github.com/SanctuaryTeam/diablo4trading-fe)
+
+[Back End](https://github.com/SanctuaryTeam/diablo4trading-be)
+
+[Shared](https://github.com/SanctuaryTeam/shared)
+---
 
 ## **Installation & Setup**
+   _NOTE:_ These steps are an example as of 8/24/2023. Official steps be updated in the future.  
 
 1. **Install the package**
    
@@ -98,6 +116,26 @@ Determine the language of the recognized text to ensure proper translation and r
 
 8. **Item Property Extraction**
 After all previous steps, item properties are determined and extracted for further use.
+
+---
+
+## Essential Dependencies
+
+   [diablosnaps](https://github.com/username/diablosnaps)
+
+1. Game Data Packages Dependency
+
+For accurate JSON representation, this project depends on packages from the repository ```diablosnaps```. While these packages are essential for the OCR system, there are a few considerations to be made:
+
+**Maintenance Concerns:** With the evolution of Diablo IV — encompassing new game features, seasons, and expansions — the data from ```diablosnaps``` must remain current. Yet, the sustained upkeep of this repository isn't guaranteed.
+
+**Forking & Alternatives:** In the event that the primary repository becomes inactive or outdated, the community may opt to fork it or search for other alternatives. Such actions, however, might bring forth new challenges, such as maintaining the fork or smoothly integrating alternate data sources.
+
+**Risks:** Depending on an external repository carries inherent risks. Alterations or discontinuations in the dependency could impact this OCR library's functionality.
+
+Proposed Strategy & Outreach:
+   
+   _With release of new Diablo IV features, season mechanics, affix's, item names, item types... etc.  Montiroing diablosnaps repository for signs of outdated data._
 
 ---
 ## **Test Coverage**
