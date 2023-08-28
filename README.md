@@ -55,7 +55,7 @@ This library aims to provide developers with an easy-to-use Optical Character Re
 1. **Install the package**
 
    ```bash
-   yarn run diablo4trading-ocr
+   yarn install
    ```
 
 2. **Include in your project**
