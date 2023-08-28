@@ -1,14 +1,20 @@
 {
-  "name": "diablo-item-ocr",
+  "name": "diablo4trading-ocr",
   "version": "0.0.0",
   "description": "A Diablo 4 OCR Library",
-  "main": "src/DiabloOCR.js",
+  "main": "src/DiabloOCR.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "dprint fmt"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "tesseract.js": "^4.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.6",
+    "@types/tesseract.js": "^2.0.0",
+    "dprint": "^0.40.2"
   }
 }

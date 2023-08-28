@@ -1,11 +1,11 @@
-const imageReader = require('./lib/image-reader.js');
+import * as imageReader from './lib/image-reader';
 
 const diabloOCR = {
-    recognize(image) {
+    recognize(image): Promise<any> {
         return new Promise((resolve) => {
             resolve(imageReader.performOcr(image));
         });
     }
 };
 
-module.exports = diabloOCR;
+export default diabloOCR;

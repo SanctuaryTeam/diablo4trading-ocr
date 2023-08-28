@@ -121,7 +121,7 @@ After all previous steps, item properties are determined and extracted for furth
 
 ## Essential Dependencies
 
-   [diablosnaps](https://github.com/username/diablosnaps)
+   [diablosnaps](https://github.com/Kyusung4698/diablosnaps)
 
 1. Game Data Packages Dependency
 
@@ -169,7 +169,7 @@ Feel free to fork, modify, and send in pull requests. The main aim is to enhance
 
 ## **Support**
 
-For any issues or feature requests, open an issue on [GitHub](<Repo link>).
+For any issues or feature requests, open an issue on [GitHub](https://github.com/SanctuaryTeam).
 
 ---
 

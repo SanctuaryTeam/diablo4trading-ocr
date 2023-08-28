@@ -1,6 +1,6 @@
-const {createWorker} = require('tesseract.js');
+import { createWorker } from 'tesseract.js';
 
-const optimizeImageForTesseract = function (image) {
+const optimizeImageForTesseract = (image: HTMLImageElement): string => {
     const threshold = 50;
 
     let canvas = document.createElement('canvas');
@@ -11,8 +11,8 @@ const optimizeImageForTesseract = function (image) {
     canvas.width = imgW;
     canvas.height = imgH;
 
-    canvasContext.drawImage(image, 0, 0);
-    const imgPixels = canvasContext.getImageData(0, 0, imgW, imgH);
+    canvasContext!.drawImage(image, 0, 0);
+    const imgPixels = canvasContext!.getImageData(0, 0, imgW, imgH);
     let data = imgPixels.data;
 
     for (let i = 0; i < data.length; i += 4) {
@@ -28,29 +28,28 @@ const optimizeImageForTesseract = function (image) {
         data[i + 2] = finalColor;
     }
 
-    canvasContext.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+    canvasContext!.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
     return canvas.toDataURL();
 }
 
-async function performOcr(image) {
+const performOcr = async (image: HTMLImageElement): Promise<string> => {
     // Omit data:image/png;base64
     let base64 = optimizeImageForTesseract(image).replace(/^data:image\/[a-z]+;base64,/, "");
     let imageBuffer = Buffer.from(base64, "base64");
 
     const worker = await createWorker();
 
-    return await (async () => {
-        await worker.loadLanguage('eng');
-        await worker.initialize('eng');
-        console.log("Recognizing...");
-        const {data: {text}} = await worker.recognize(imageBuffer);
-        console.log('text', text);
-        await worker.terminate();
-        return text;
-    })();
+    await worker.loadLanguage('eng');
+    await worker.initialize('eng');
+    console.log("Recognizing...");
+    const { data: { text } } = await worker.recognize(imageBuffer);
+    console.log('text', text);
+    await worker.terminate();
+    return text;
 }
 
-module.exports = {
+// Convert module.exports to ES6 exports
+export {
     optimizeImageForTesseract,
     performOcr
 }

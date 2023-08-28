@@ -210,3 +210,6 @@ fabric.properties
 
 #.idea folder
 .idea/
+
+#node_modules
+node_modules/
