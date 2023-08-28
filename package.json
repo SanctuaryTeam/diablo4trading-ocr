@@ -1,6 +1,6 @@
 {
   "name": "diablo4trading-ocr",
-  "version": "0.0.0",
+  "version": "0.0.9",
   "description": "A Diablo 4 OCR Library",
   "main": "src/DiabloOCR.ts",
   "scripts": {
@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@diablosnaps/common": "^0.2.5",
     "tesseract.js": "^4.1.1"
   },
   "devDependencies": {
