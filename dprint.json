@@ -1,0 +1,18 @@
+{
+  "json": {},
+  "typescript": {
+    "indentWidth": 4,
+    "quoteStyle": "preferSingle",
+    "jsx.quoteStyle": "preferSingle"
+  },
+  "excludes": [
+    "**/node_modules",
+    "**/dist",
+    "**/public",
+    "src/modules/common/i18n"
+  ],
+  "plugins": [
+    "https://plugins.dprint.dev/json-0.17.4.wasm",
+    "https://plugins.dprint.dev/typescript-0.85.1.wasm"
+  ]
+}

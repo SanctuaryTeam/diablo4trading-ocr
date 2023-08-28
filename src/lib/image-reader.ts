@@ -30,26 +30,23 @@ const optimizeImageForTesseract = (image: HTMLImageElement): string => {
 
     canvasContext!.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
     return canvas.toDataURL();
-}
+};
 
 const performOcr = async (image: HTMLImageElement): Promise<string> => {
     // Omit data:image/png;base64
-    let base64 = optimizeImageForTesseract(image).replace(/^data:image\/[a-z]+;base64,/, "");
-    let imageBuffer = Buffer.from(base64, "base64");
+    let base64 = optimizeImageForTesseract(image).replace(/^data:image\/[a-z]+;base64,/, '');
+    let imageBuffer = Buffer.from(base64, 'base64');
 
     const worker = await createWorker();
 
     await worker.loadLanguage('eng');
     await worker.initialize('eng');
-    console.log("Recognizing...");
+    console.log('Recognizing...');
     const { data: { text } } = await worker.recognize(imageBuffer);
     console.log('text', text);
     await worker.terminate();
     return text;
-}
+};
 
 // Convert module.exports to ES6 exports
-export {
-    optimizeImageForTesseract,
-    performOcr
-}
+export { optimizeImageForTesseract, performOcr };
