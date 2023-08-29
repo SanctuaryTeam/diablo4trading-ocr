@@ -213,3 +213,6 @@ fabric.properties
 
 #node_modules
 node_modules/
+
+#coverage
+coverage/

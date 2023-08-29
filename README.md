@@ -142,18 +142,33 @@ Proposed Strategy & Outreach:
 ### Strategy:
 
 Our approach to ensuring the accuracy and reliability of the Diablo Item OCR Library hinges on comprehensive test coverage. Here's a step-by-step breakdown of our test coverage strategy:
+1. **Executing tests**: We are using jest for our unit test frame work, current test scripts are listed below.
+   - **test:unit**: this command will trigger the unit test suite
+```bash
+   yarn test:unit
+```
+   - **test**:  this command will be an e2e test triggering all test suites __currently only triggering test:unit__
 
-1. **Fixture Data Collection**:
+```bash
+   yarn test
+```
+
+ - **test:coverage**: generates coverage will report to console and html reports into a coverage folder.
+ ```bash
+   yarn test:coverage
+```
+
+2. **Fixture Data Collection**:
    - We maintain a curated set of fixture data, comprised of a series of known item images. These images are representative of different scenarios, languages, tooltip sizes, and color blind settings to ensure our library's broad applicability.
 
-2. **Automated Testing**:
+3. **Automated Testing**:
    - For each image in the fixture data set, we have an associated known output (i.e., a predetermined JSON representation of the item). 
    - During testing, our test cases loop through each image in the fixture data, process it using the OCR library, and then generate an output.
 
-3. **Asserting Accuracy**:
+4. **Asserting Accuracy**:
    - The generated output is then compared or "asserted" against the known output. Any discrepancies are flagged, allowing us to pinpoint potential issues in the OCR recognition or processing.
 
-4. **Continuous Integration**:
+5. **Continuous Integration**:
    - To maintain the highest level of reliability, these tests are routinely run, especially when any changes or updates are made to the library. This ensures that any modifications do not introduce regressions or unexpected behaviors.
 
 ### Contribution to Tests:
