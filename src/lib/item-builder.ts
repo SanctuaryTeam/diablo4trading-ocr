@@ -12,6 +12,10 @@ const itemTypesWithArmor = [
     Game.ItemType.Boots,
 ];
 
+const itemTypesWeapons= [
+
+];
+
 const jewelry = [
     Game.ItemType.Ring,
     Game.ItemType.Amulet,
@@ -77,7 +81,9 @@ export default class ItemBuilder {
             }
 
             //TODO: only if item category has dph
-            this.findDamagePerHit(line, index);
+            if(this.item.hasOwnProperty('type') && itemTypesWeapons.includes(this.item.type)){
+                this.findDamagePerHit(line, index);
+            }
 
             this.findRequiredLevel(line, index);
             this.findEmptySockets(line, index);
@@ -101,6 +107,9 @@ export default class ItemBuilder {
         }
 
         const potentialAffixes = this.potentialAffixes(this.lines);
+
+        console.log('potentialAffixes', potentialAffixes.map( affix => affix.line));
+
         let affixMatches = [];
 
         potentialAffixes.forEach((potentialAffix) => {
@@ -111,7 +120,11 @@ export default class ItemBuilder {
 
                 let similarity = this.similarText(affix, potentialAffix.line);
 
-                if (similarity >= 80 && similarity <= 90) {
+                if (similarity >= 70 && similarity <= 90) {
+                    // console.log('potentialAffix.line', potentialAffix.line);
+                    // console.log('affix.line', affix);
+                    // console.log('similarity', similarity);
+
                     similarity = this.similarText(potentialAffix.line.replace(/\[(.*)|\{(.*)|\((.*)/).trim(), affix)
                 }
 
@@ -211,7 +224,7 @@ export default class ItemBuilder {
             //variant
             if (!this.item.hasOwnProperty('variant')) {
                 for (let variant in Game.ItemVariant) {
-                    if (this.similarText(word, variant) >= 80) {
+                    if (this.similarText(word, Game.ItemVariant[variant]) >= 80) {
                         this.item.variant = <ItemVariant>variant;
                         return;
                     }
@@ -222,7 +235,7 @@ export default class ItemBuilder {
             if (!this.item.quality) {
                 for (let quality in Game.ItemQuality) {
 
-                    if (this.similarText(word, quality) >= 80) {
+                    if (this.similarText(word, Game.ItemQuality[quality]) >= 80) {
                         this.item.quality = <ItemQuality>quality;
 
                         if (this.item.quality == Game.ItemQuality.Legendary || this.item.quality == Game.ItemQuality.Unique) {
@@ -239,7 +252,7 @@ export default class ItemBuilder {
             if (!this.item.hasOwnProperty('type')) {
                 for (let type in Game.ItemType) {
                     //TODO if type is "legs", use "pants" instead
-                    if (this.similarText(word, type) >= 86) {
+                    if (this.similarText(word, Game.ItemType[type]) >= 86) {
                         this.item.type = <ItemType>type;
                         return;
                     }
@@ -256,7 +269,7 @@ export default class ItemBuilder {
                 let potentialItemCategoryName = `${word} ${line.replace(/\s+/g, ' ').split(' ').pop()}`;
 
                 for (let type in Game.ItemType) {
-                    if (this.similarText(potentialItemCategoryName, type) >= 85) {
+                    if (this.similarText(potentialItemCategoryName, Game.ItemType[type]) >= 85) {
                         this.item.type = <ItemType>type;
                         return;
                     }
@@ -266,7 +279,7 @@ export default class ItemBuilder {
                 potentialItemCategoryName = `${word} ${line.split(' ')[0]}`;
 
                 for (let type in Game.ItemType) {
-                    if (this.similarText(potentialItemCategoryName, type) >= 85) {
+                    if (this.similarText(potentialItemCategoryName, Game.ItemType[type]) >= 85) {
                         this.item.type = <ItemType>type;
                         return;
                     }
@@ -357,7 +370,7 @@ export default class ItemBuilder {
             const potentialMalignantSocket = line.replace(/[^A-Za-z\s]/g, '').trim().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
             for (let malignantSocket in MalignantSockets) {
-                if (this.similarText(potentialMalignantSocket, malignantSocket) >= 95) {
+                if (this.similarText(potentialMalignantSocket, MalignantSockets[malignantSocket]) >= 95) {
                     this.item.emptyMalignantSockets = <MalignantSockets>malignantSocket;
                     return;
                 }
@@ -388,7 +401,7 @@ export default class ItemBuilder {
 
 
         for (const characterClass in Game.Class) {
-            if (line.includes(characterClass) || this.similarText(line, characterClass) >= 80) {
+            if (line.includes(characterClass) || this.similarText(line, Game.Class[characterClass]) >= 80) {
                 let hasOnly = false;
 
                 //word doesn't have 'only' - removes skill upgrade affixes
@@ -454,15 +467,16 @@ export default class ItemBuilder {
         // in: ®38.0% Shadow Resistance [24.5 -
         // out: #% Shadow Resistance
         potentialAffixes = potentialAffixes.map((potentialAffix) => {
+            // console.log('line before: ', potentialAffix.line);
             let line = potentialAffix.line;
 
             // Remove percentages after closing brackets
-            line = line.replace(/(?<=\])\%/, "");
-            line = line.replace(/(?<=\))\%/, "");
-            line = line.replace(/(?<=\})\%/, "");
+            line = line.replace(/(?<=\])\%/g, "");
+            line = line.replace(/(?<=\))\%/g, "");
+            line = line.replace(/(?<=\})\%/g, "");
 
             // Remove "+" before {,[,(
-            line = line.replace(/\+(?=[\(\{\[])/, "");
+            line = line.replace(/\+(?=[\(\{\[])/g, "");
 
             // Remove min & max rolls (balanced pairs of parentheses, curly braces, and square brackets)
             const regex = /\((?:[^()]|[^()]*(?=\(\)))*\)|\{(?:[^{}]|[^{}]*(?=\{\}))*\}|\[(?:[^\[\]]|[^\[\]]*(?=\[\]))*\]|\[[^\[\]\(\)]*\]/g;
@@ -471,19 +485,21 @@ export default class ItemBuilder {
             }
 
             // Remove special characters
-            line = line.replace(/[*@©°®¢©|&‘]/, "");
+            line = line.replace(/[*@©°®¢©|&‘']/g, "");
 
             // Remove "‘" at the start of the string
-            const withoutMismatched = line.replace(/^‘/, "");
+            const withoutMismatched = line.replace(/^‘/g, "");
 
             // Replace affix value with '#' to match affix description names
-            let refinedLine = withoutMismatched.replace(/\d+(?:,\d+)*(?:\.\d+)*/, "#").trim();
+            let refinedLine = withoutMismatched.replace(/\d+(?:,\d+)*(?:\.\d+)*/g, "#").trim();
 
             // Remove unmatched curly brackets, parentheses, and square brackets
             refinedLine = this.removeMismatchedContent(refinedLine).trim();
 
             potentialAffix.withoutSpecialCharacters = withoutMismatched;
             potentialAffix.line = refinedLine;
+
+            // console.log('line after: ', potentialAffix.line);
 
             return potentialAffix;
         });
