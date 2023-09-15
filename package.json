@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@diablosnaps/assets": "^0.2.5",
     "@diablosnaps/common": "^0.2.5",
     "jimp": "^0.22.10",
     "tesseract.js": "^4.1.1"
