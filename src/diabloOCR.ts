@@ -5,6 +5,7 @@ const diabloOCR = {
     recognize(image): Promise<any> {
         return new Promise(async (resolve) => {
             let text = await imageReader.performOcr(image);
+            console.log('text');
             resolve(new ItemBuilder(text).build());
         });
     },

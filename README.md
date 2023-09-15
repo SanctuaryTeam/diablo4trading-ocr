@@ -120,7 +120,9 @@ After all previous steps, item properties are determined and extracted for furth
 
    [diablosnaps](https://github.com/Kyusung4698/diablosnaps)
    
-   [tesseract.js](https://github.com/naptha/tesseract.js) 
+   [tesseract.js](https://github.com/naptha/tesseract.js)
+
+   [Jimp](https://github.com/jimp-dev/jimp/)
 
 ### Game Data Packages Dependency
 

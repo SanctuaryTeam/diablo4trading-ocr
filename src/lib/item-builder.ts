@@ -1,60 +1,86 @@
 import leven from "leven";
 import {Assets} from '@diablosnaps/assets';
+import {Game} from "@diablosnaps/common";
+import {ItemQuality, ItemType} from "@diablosnaps/common/cjs/game/types/item";
+import {ItemVariant} from "@diablosnaps/common/esm/game/types";
+
+const itemTypesWithArmor = [
+    Game.ItemType.Helm,
+    Game.ItemType.ChestArmor,
+    Game.ItemType.Gloves,
+    Game.ItemType.Legs,
+    Game.ItemType.Boots,
+];
+
+const jewelry = [
+    Game.ItemType.Ring,
+    Game.ItemType.Amulet,
+];
+
+enum MalignantSockets {
+    Vicious = "Empty Vicious Malignant Socket",
+    Devious = "Empty Devious Malignant Socket",
+    Brutal = "Empty Brutal Malignant Socket",
+}
 
 export default class ItemBuilder {
-
-    item = {
-        implicitAffixes: [],
+    item: Game.Item = {
+        language: Game.Language.English,
+        quality: null,
+        inherentAffixes: [],
         affixes: [],
     }
 
     lines = null;
+    linesOriginal = null;
 
     constructor(text) {
-        // this.lines = text.split(/\r\n|\n|\r/);
+        this.lines = text.split(/\r\n|\n|\r/);
 
-        this.lines = [
-            "BITTER WEAPGN /",
-            "Ancestral Rare Two-Handed e",
-            "Sword (Slashing) /",
-            "794 Item Power",
-            "—_—— o",
-            "2,244 Damage Per Second (-35)",
-            "': [1,795 - 2,693] Damage per Hit",
-            "1.00 Attacks per Second",
-            "@ +35.0% Critical Strike Damage",
-            "[35.01%",
-            "———_—— o ——",
-            "© +41.0% Critical Strike Damage [28.0 -",
-            "42.00%",
-            "& +39.0% Vulnerable Damage [33.0 -",
-            "47.0%",
-            "@ +54 All Stats +[40 - 56]",
-            "& +67.0% Basic Skill Damage [37.0 -",
-            "79.01% ]",
-            "Requires Level 97",
-            "- e",
-            "Sell Value: 33,254 &",
-            "R Durability: 100/100 |",
-            ""
-        ];
+        // this.lines = [
+        //     "BITTER WEAPGN /",
+        //     "Ancestral Rare Two-Handed e",
+        //     "Sword (Slashing) /",
+        //     "794 Item Power",
+        //     "—_—— o",
+        //     "2,244 Damage Per Second (-35)",
+        //     "': [1,795 - 2,693] Damage per Hit",
+        //     "1.00 Attacks per Second",
+        //     "@ +35.0% Critical Strike Damage",
+        //     "[35.01%",
+        //     "———_—— o ——",
+        //     "© +41.0% Critical Strike Damage [28.0 -",
+        //     "42.00%",
+        //     "& +39.0% Vulnerable Damage [33.0 -",
+        //     "47.0%",
+        //     "@ +54 All Stats +[40 - 56]",
+        //     "& +67.0% Basic Skill Damage [37.0 -",
+        //     "79.01% ]",
+        //     "Requires Level 97",
+        //     "- e",
+        //     "Sell Value: 33,254 &",
+        //     "R Durability: 100/100 |",
+        //     ""
+        // ];
+
+        this.linesOriginal = JSON.parse(JSON.stringify(this.lines));
     }
 
     async build() {
         this.lines.filter(l => l).forEach((line, index) => {
             this.findEssentials(line, index);
+            this.findAccountBound(line, index);
             this.findItemPower(line, index);
 
-            //TODO: only if item category has armor
-            this.findArmor(line, index);
+            if(this.item.hasOwnProperty('type') && itemTypesWithArmor.includes(this.item.type)){
+                this.findArmor(line, index);
+            }
 
             //TODO: only if item category has dph
             this.findDamagePerHit(line, index);
 
             this.findRequiredLevel(line, index);
-
-            //TODO: sockets
-
+            this.findEmptySockets(line, index);
             this.findClass(line, index);
         })
 
@@ -182,17 +208,84 @@ export default class ItemBuilder {
 
         line.split(" ").forEach((word) => {
 
-            //rarity
-            const rarities = ['Magic', 'Rare'];
-
-            rarities.forEach((rarity, key) => {
-                if (this.similarText(word, rarity) >= 80) {
-                    this.lines.splice(key, index);
+            //variant
+            if (!this.item.hasOwnProperty('variant')) {
+                for (let variant in Game.ItemVariant) {
+                    if (this.similarText(word, variant) >= 80) {
+                        this.item.variant = <ItemVariant>variant;
+                        return;
+                    }
                 }
-            });
+            }
+
+            //quality
+            if (!this.item.quality) {
+                for (let quality in Game.ItemQuality) {
+
+                    if (this.similarText(word, quality) >= 80) {
+                        this.item.quality = <ItemQuality>quality;
+
+                        if (this.item.quality == Game.ItemQuality.Legendary || this.item.quality == Game.ItemQuality.Unique) {
+                            this.item.accountBound = true
+                            return;
+                        }
+
+                    }
+                }
+            }
+
+
+            //item type
+            if (!this.item.hasOwnProperty('type')) {
+                for (let type in Game.ItemType) {
+                    //TODO if type is "legs", use "pants" instead
+                    if (this.similarText(word, type) >= 86) {
+                        this.item.type = <ItemType>type;
+                        return;
+                    }
+                }
+
+            }
+
+            //type not set, variant and quality are set
+            //then could be two words or wrapping
+            if ((this.item.hasOwnProperty('varient') || this.item.hasOwnProperty('quality')) || this.item.hasOwnProperty('type')) {
+
+                //could be two words on same line (body armor)
+                const line = this.linesOriginal[index];
+                let potentialItemCategoryName = `${word} ${line.replace(/\s+/g, ' ').split(' ').pop()}`;
+
+                for (let type in Game.ItemType) {
+                    if (this.similarText(potentialItemCategoryName, type) >= 85) {
+                        this.item.type = <ItemType>type;
+                        return;
+                    }
+                }
+
+                //could be wrapping (Two-handed sword does this)
+                potentialItemCategoryName = `${word} ${line.split(' ')[0]}`;
+
+                for (let type in Game.ItemType) {
+                    if (this.similarText(potentialItemCategoryName, type) >= 85) {
+                        this.item.type = <ItemType>type;
+                        return;
+                    }
+                }
+
+            }
         });
     }
 
+    findAccountBound(line, index) {
+        if (this.item.hasOwnProperty("Item Power") && this.item.accountBound == true) {
+            return;
+        }
+
+        if (this.similarText(line, "Account bound") >= 80) {
+            this.item.accountBound = true;
+            this.lines.splice(index, 1);
+        }
+    }
 
     findItemPower(line, index) {
         if (this.item.hasOwnProperty("Item Power")) {
@@ -201,7 +294,7 @@ export default class ItemBuilder {
 
         if (line.includes("Item Power") || this.similarText(line, "Item Power") >= 80) {
             const filteredNumbers = line.split(/\D+/).filter(Boolean);
-            this.item.item_power = parseInt(filteredNumbers[0]);
+            this.item.power = parseInt(filteredNumbers[0]);
             this.lines.splice(index, 1);
         }
     }
@@ -213,13 +306,13 @@ export default class ItemBuilder {
 
         if (line.includes("Armor") || this.similarText(line, "Armor") >= 80) {
             const filteredNumbers = line.split(/\D+/).filter(Boolean);
-            this.item.item_power = parseInt(filteredNumbers[0]);
+            this.item.power = parseInt(filteredNumbers[0]);
             this.lines.splice(index, 1);
         }
     }
 
     findDamagePerHit(line, index) {
-        if (this.item.hasOwnProperty("min_damage_per_hit") && this.item.hasOwnProperty("max_damage_per_hit")) {
+        if (this.item.hasOwnProperty("minDamagePerHit") && this.item.hasOwnProperty("maxDamagePerHit")) {
             return
         }
 
@@ -240,14 +333,41 @@ export default class ItemBuilder {
         const numbersInBrackets = contentInBrackets[0].match(/\b\d[\d,.]*\b/g);
 
         if (numbersInBrackets && numbersInBrackets.length >= 2) {
-            this.item.min_damage_per_hit = parseInt(numbersInBrackets[0].replace(/,/g, ''), 10);
-            this.item.max_damage_per_hit = parseInt(numbersInBrackets[1].replace(/,/g, ''), 10);
+            this.item.minDamagePerHit = parseInt(numbersInBrackets[0].replace(/,/g, ''), 10);
+            this.item.maxDamagePerHit = parseInt(numbersInBrackets[1].replace(/,/g, ''), 10);
             this.lines.splice(index, 1);
         }
     }
 
+    findEmptySockets(line, index) {
+        if (this.similarText(line, "Empty Socket") >= 80) {
+            if (!this.item.hasOwnProperty('emptySockets')) {
+                this.item.emptySockets = 1;
+            } else {
+                if (this.item.emptySockets < 2) {
+                    this.item.emptySockets++;
+                }
+            }
+
+            this.lines.splice(index, 1);
+        }
+
+        //malignant sockets
+        if(this.item.type && jewelry.includes(this.item.type)){
+            const potentialMalignantSocket = line.replace(/[^A-Za-z\s]/g, '').trim().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+
+            for (let malignantSocket in MalignantSockets) {
+                if (this.similarText(potentialMalignantSocket, malignantSocket) >= 95) {
+                    this.item.emptyMalignantSockets = <MalignantSockets>malignantSocket;
+                    return;
+                }
+            }
+
+        }
+    }
+
     findRequiredLevel(line, index) {
-        if (this.item.hasOwnProperty("character_level_requirement")) {
+        if (this.item.hasOwnProperty("requiredLevel")) {
             return;
         }
 
@@ -255,21 +375,19 @@ export default class ItemBuilder {
             const numbers = line.match(/\d+/);
 
             if (numbers && numbers.length > 0) {
-                this.item.character_level_requirement = parseInt(numbers[numbers.length - 1], 10);
+                this.item.requiredLevel = parseInt(numbers[numbers.length - 1], 10);
                 this.lines.splice(index, 1);
             }
         }
     }
 
     findClass(line, index) {
-        if (this.item.hasOwnProperty("class")) {
+        if (this.item.hasOwnProperty("classRestriction")) {
             return;
         }
 
-        //TODO: import character classes
-        const characterClasses = ["Rogue", "Druid"];
 
-        for (const characterClass of characterClasses) {
+        for (const characterClass in Game.Class) {
             if (line.includes(characterClass) || this.similarText(line, characterClass) >= 80) {
                 let hasOnly = false;
 
@@ -281,7 +399,7 @@ export default class ItemBuilder {
                 });
 
                 if (!hasOnly) {
-                    this.item.class = characterClass;
+                    this.item.classRestriction = <Game.Class>characterClass;
                     this.lines.splice(index, 1);
                     break; // If needed, you can break the loop
                 }
@@ -435,5 +553,9 @@ export default class ItemBuilder {
 
     similarText(first, second) {
         return (100 - (leven(first.toLowerCase(), second.toLowerCase()) / Math.max(first.length, second.length)) * 100);
+    }
+
+    itemTypeType(){
+
     }
 }
