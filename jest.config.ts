@@ -18,7 +18,7 @@ const config: Config = {
     transform: {
         '^.+\\.tsx?$': 'ts-jest',
     },
-    "modulePaths": ["<rootDir>"]
+    moduleDirectories: ["node_modules"],
 };
 
 // eslint-disable-next-line import/no-default-export
